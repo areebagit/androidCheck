@@ -2,6 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:gitiichecking/SignIn.dart';
 import 'package:gitiichecking/custom.dart';
 
+import 'dart:convert';
+import 'dart:math';
+import 'package:flutter/services.dart';
+import 'package:velocity_x/velocity_x.dart';
+import 'package:http/http.dart' as http;
+import 'config.dart';
+
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({Key? key}) : super(key: key);
@@ -11,7 +18,33 @@ class SignUpScreen extends StatefulWidget {
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
-  // bool notvisible = true;
+   String email = '';
+   String password = '' ;
+  bool _isNotValidate = false;
+
+  void registerUser() async{
+    if(email.isNotEmpty && password.isNotEmpty){
+      var regBody = {               //an object to send to backend
+        "email":email,
+        "password":password
+      };
+      var response = await http.post(Uri.parse(registration),
+          headers: {"Content-Type":"application/json"},
+          body: jsonEncode(regBody)
+      );
+      var jsonResponse = jsonDecode(response.body);
+      print(jsonResponse['status']);
+      if(jsonResponse['status']){
+        Navigator.push(context, MaterialPageRoute(builder: (context)=>SignInScreen(isCustomer: true,)));
+      }else{
+        print("SomeThing Went Wrong");
+      }
+    }else{
+      setState(() {
+        _isNotValidate = true;
+      });
+    }
+  }
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
@@ -42,23 +75,27 @@ class _SignUpScreenState extends State<SignUpScreen> {
               Padding(
                 padding: const EdgeInsets.only(left: 10.0,right: 10),
                 child: CustomTextField(
+                  initialValue: email.isEmpty?'':email,
                   hintText: "Enter your email",
                   obscureTexthehe: false,
                   prefixWidget: Icon(Icons.email_rounded,color: Color(0xFF17203A),),
                   onchangedFunction: (value){
-                    ///username = value;
+                    email = value;
                   },
+                  errorTexi: _isNotValidate ? "Enter proper info" :null,
                 ),
               ),
               Padding(
                 padding: const EdgeInsets.only(left: 10.0,right: 10),
                 child: CustomTextField(
+                  initialValue: password.isEmpty?'':password,
                   hintText: "Enter your password",
                   obscureTexthehe: true,
                   prefixWidget: Icon(Icons.key,color: Color(0xFF17203A),),
                   onchangedFunction: (value){
-                    ///password = value;
+                    password = value;
                   },
+                  errorTexi: _isNotValidate ? "Enter proper info" :null,
                 ),
               ),
               Padding(
@@ -78,6 +115,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   child: TextButton(
                     onPressed: () {
                       //Navigator.push(context, MaterialPageRoute(builder: (context) => CredentialsAfterSignUp()));
+                      registerUser();
                       print(" USER ADDED");
                     },
                     child: Text(
@@ -204,11 +242,11 @@ class OtherSignUpOptions extends StatelessWidget {
                 width: 1.0, // Adjust the width of the border as needed
               ),
             ),
-            padding: EdgeInsets.all(10.0), // Adjust the padding as needed
-            child: Image.asset(
-              "assets/paymentIcons/google.png", // Facebook icon from Flutter Icons package
-              height: 40.0,
-              width: 40,// Adjust the size of the icon as needed
+            padding: EdgeInsets.all(5.0), // Adjust the padding as needed
+            child: Icon(
+              Icons.g_mobiledata, // Facebook icon from Flutter Icons package
+              size: 50.0, // Adjust the size of the icon as needed
+              color: Colors.blue, // Adjust the color of the icon as needed
             ),
           ),
           Container(
